@@ -1,9 +1,9 @@
-
 package com.narxoz.rpg.facade;
 
 import com.narxoz.rpg.decorator.AttackAction;
 import com.narxoz.rpg.enemy.BossEnemy;
 import com.narxoz.rpg.hero.HeroProfile;
+
 import java.util.Random;
 
 public class BattleService {
@@ -16,38 +16,50 @@ public class BattleService {
 
     public AdventureResult battle(HeroProfile hero, BossEnemy boss, AttackAction action) {
         AdventureResult result = new AdventureResult();
-        int round = 1;
+        int rounds = 0;
 
-        while (hero.isAlive() && boss.isAlive() && round <= 10) {
-            result.addLine("Round " + round + ":");
+        result.addLine("--- BATTLE COMMENCE ---");
 
-            // Hero attacks
+        while (hero.isAlive() && boss.isAlive() && rounds < 50) {
+            rounds++;
+            result.addLine("\n[Round " + rounds + "]");
+
             int heroDmg = action.getDamage();
-            boss.takeDamage(heroDmg);
-            result.addLine(hero.getName() + " uses " + action.getActionName() + " for " + heroDmg + " damage!");
+            if (random.nextInt(100) < 10) {
+                result.addLine(boss.getName() + " swiftly dodged the attack!");
+            } else {
+                boss.takeDamage(heroDmg);
+                result.addLine(hero.getName() + " strikes with " + action.getActionName() + " for " + heroDmg + " DMG.");
+                result.addLine("   -> Effects: " + action.getEffectSummary());
+            }
 
             if (!boss.isAlive()) {
-                result.setWinner(hero.getName());
-                result.addLine(boss.getName() + " has been defeated!");
+                result.addLine("*** " + boss.getName() + " collapses! ***");
                 break;
             }
 
-            // Boss attacks
-            int bossDmg = boss.getAttackPower() + random.nextInt(5);
+            int bossDmg = boss.getAttackPower();
+            if (random.nextInt(100) < 20) {
+                bossDmg = (int) (bossDmg * 1.5);
+                result.addLine(boss.getName() + " unleashes a devastating heavy strike!");
+            }
             hero.takeDamage(bossDmg);
-            result.addLine(boss.getName() + " strikes back for " + bossDmg + " damage!");
+            result.addLine(boss.getName() + " retaliates, hitting " + hero.getName() + " for " + bossDmg + " DMG.");
 
             if (!hero.isAlive()) {
-                result.setWinner(boss.getName());
-                result.addLine(hero.getName() + " has fallen in battle...");
+                result.addLine("*** " + hero.getName() + " has fallen in battle! ***");
                 break;
             }
-            round++;
         }
 
-        result.setRounds(round > 10 ? 10 : round);
-        if (result.getWinner() == null) result.setWinner("Draw");
-
+        result.setRounds(rounds);
+        if (hero.isAlive() && !boss.isAlive()) {
+            result.setWinner(hero.getName());
+        } else if (!hero.isAlive() && boss.isAlive()) {
+            result.setWinner(boss.getName());
+        } else {
+            result.setWinner("Draw");
+        }
         return result;
     }
 }

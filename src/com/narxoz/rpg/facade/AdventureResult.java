@@ -9,6 +9,7 @@ public class AdventureResult {
     private int rounds;
     private String reward;
     private final List<String> log = new ArrayList<>();
+    private String preparationSummary;
 
     public String getWinner() {
         return winner;
@@ -41,4 +42,6 @@ public class AdventureResult {
     public List<String> getLog() {
         return Collections.unmodifiableList(log);
     }
+    public String getPreparationSummary() { return preparationSummary; }
+    public void setPreparationSummary(String summary) { this.preparationSummary = summary; }
 }
